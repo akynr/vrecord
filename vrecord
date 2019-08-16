@@ -225,6 +225,9 @@ _gtk_vbox_list() {
         elif [[ "${VARIABLE_NAME}" == "CONTAINER_CHOICE" ]] ;then
             echo '<action condition="command_is_true( [ \"$CONTAINER_CHOICE\" = \"Matroska\" ] && echo true)">enable:EMBED_LOGS_CHOICE</action>
                   <action condition="command_is_true( [ \"$CONTAINER_CHOICE\" != \"Matroska\" ] && echo true)">disable:EMBED_LOGS_CHOICE</action>'
+        elif [[ "${VARIABLE_NAME}" == "DEVICE_INPUT_CHOICE" ]] ; then
+            echo '<action condition="command_is_true( [ \"$DEVICE_INPUT_CHOICE\" = \"Decklink\" ] && echo true)">enable:Decklink</action>
+                  <action condition="command_is_true( [ \"$DEVICE_INPUT_CHOICE\" != \"Decklink\" ] && echo true)">disable:Decklink</action>'
         fi
     }
 
@@ -283,30 +286,38 @@ _edit_prefs() {
         <text>
             <label>Set file recording options. Leave the option ${UNSELECTEDOPTION} to be prompted later.</label>
         </text>
+        $(_gtk_vbox_list "DEVICE_INPUT_CHOICE"        "Select Source Input"            "${DEVICE_INPUT_OPTIONS[@]}")
+        <notebook labels=\"Decklink|Avfoundation\">
         <hbox>
-            <text>
-                <label>Capture card options</label>
-            </text>
             $(_gtk_vbox_list "VIDEO_INPUT_CHOICE"       "Select Video Input"            "${VIDEO_INPUT_OPTIONS[@]}")
             $(_gtk_vbox_list "AUDIO_INPUT_CHOICE"       "Select Audio Input"            "${AUDIO_INPUT_OPTIONS[@]}")
             $(_gtk_vbox_list "AUDIO_MAPPING_CHOICE"     "Select Audio Channel Mapping"  "${CHANNEL_MAPPING_OPTIONS[@]}" )
             $(_gtk_vbox_list "STANDARD_CHOICE"          "Select Standard"               "${STANDARD_OPTIONS[@]}")
+            $(_gtk_vbox_list "VIDEO_BIT_DEPTH_CHOICE"   "Select Video Bit Depth"        "${VIDEO_BITDEPTH_OPTIONS[@]}")
+            $(_gtk_vbox_list "TIMECODE_CHOICE"          "Select timecode format"        "${TIMECODE_OPTIONS[@]}")
         </hbox>
         <hbox>
-            $(_gtk_vbox_list "EMBED_LOGS_CHOICE"        "Embed digitization logs in video file (Matroska ONLY)" "${EMBED_LOGS_OPTIONS[@]}")
-            $(_gtk_vbox_list "FRAMEMD5_CHOICE"          "Create frame-level MD5 checksums? (recommended)"       "${FRAMEMD5_OPTIONS[@]}")
+            $(_gtk_vbox_list "VIDEO_INPUT_CHOICE"       "Select Video Input"            "${VIDEO_INPUT_OPTIONS[@]}")
+        </hbox>
+        </notebook>
+        <frame Output file options>
+        <hbox>
             $(_gtk_vbox_list "CONTAINER_CHOICE"         "Select File Format"            "${CONTAINER_OPTIONS[@]}")
+            $(_gtk_vbox_list "EMBED_LOGS_CHOICE"        "Embed digitization logs in video file (Matroska ONLY)" "${EMBED_LOGS_OPTIONS[@]}")
             $(_gtk_vbox_list "VIDEO_CODEC_CHOICE"       "Select Video Codec"            "${VIDEO_CODEC_OPTIONS[@]}")
             $(_gtk_vbox_list "FFV1_SLICE_CHOICE"        "FFV1 Slice Count"              "${FFV1_SLICE_OPTIONS[@]}")
             $(_gtk_vbox_list "AUDIO_CODEC_CHOICE"       "Select Audio Codec"            "${AUDIO_CODEC_OPTIONS[@]}")
-            $(_gtk_vbox_list "VIDEO_BIT_DEPTH_CHOICE"   "Select Video Bit Depth"        "${VIDEO_BITDEPTH_OPTIONS[@]}")
         </hbox>
+        </frame>
+        <frame Playback and sidecar file options>
         <hbox>
-            $(_gtk_vbox_list "TIMECODE_CHOICE"          "Select timecode format"        "${TIMECODE_OPTIONS[@]}")
+            $(_gtk_vbox_list "FRAMEMD5_CHOICE"          "Create frame-level MD5 checksums? (recommended)"       "${FRAMEMD5_OPTIONS[@]}")
             $(_gtk_vbox_list "QCTOOLSXML_CHOICE"        "Create QCTools XML?"           "${QCTOOLSXML_OPTIONS[@]}")
             $(_gtk_vbox_list "PLAYBACKVIEW_CHOICE"      "Select View (for recording)"   "${PLAYBACKVIEW_OPTIONS[@]}")
             $(_gtk_vbox_list "PLAYBACKVIEW_CHOICE_PASS" "Select View (for passthrough)" "${PLAYBACKVIEW_OPTIONS[@]}")
         </hbox>
+        </frame>
+        <frame Special Cases>
         <hbox>
             <vbox>
                 <text>
@@ -333,7 +344,16 @@ _edit_prefs() {
                     <variable>NO_SUFFIX</variable>
                 </checkbox>
             </vbox>
+            <vbox>
+                <checkbox>
+                    <label>Invert Second Channel of Audio (WARNING: Do not use this option unless required)</label>
+                    <default>false</default>
+                    <variable>INVERT_PHASE</variable>
+                </checkbox>
+            </vbox>
         </hbox>
+        </frame>
+        <frame Recording Options>
         <hbox>
             <vbox>
                 <text>
@@ -351,13 +371,6 @@ _edit_prefs() {
                 <entry>
                     <variable>TECHNICIAN</variable>
                 </entry>
-            </vbox>
-            <vbox>
-                <checkbox>
-                    <label>Invert Second Channel of Audio (WARNING: Do not use this option unless required)</label>
-                    <default>false</default>
-                    <variable>INVERT_PHASE</variable>
-                </checkbox>
             </vbox>
         </hbox>
         <hbox>
@@ -388,6 +401,7 @@ _edit_prefs() {
                 <action type=\"fileselect\">LOGDIR</action>
             </button>
         </hbox>
+        </frame>
         <vbox>
             <hbox>
                 <button ok>
@@ -1041,6 +1055,7 @@ drawgrid=w=32:h=32:t=1:c=white@0.1,\
 drawgrid=w=256:h=256:t=1:c=white@0.2"
 
 # list of selections for each vrecord option
+DEVICE_INPUT_OPTIONS=("File" "Decklink" "AVFoundation")
 VIDEO_INPUT_OPTIONS=("Composite" "SDI" "Component" "S-Video")
 AUDIO_INPUT_OPTIONS=("Analog" "SDI Embedded Audio" "Digital Audio (AES/EBU)")
 CONTAINER_OPTIONS=("QuickTime" "Matroska" "AVI" "MXF")
