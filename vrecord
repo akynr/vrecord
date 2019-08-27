@@ -278,35 +278,44 @@ _edit_prefs() {
     fi
   }
 
+DECKLINK_INPUT_GUI="<hbox>
+$(_gtk_vbox_list "VIDEO_INPUT_CHOICE"       "Select Video Input"            "${VIDEO_INPUT_OPTIONS[@]}")
+$(_gtk_vbox_list "AUDIO_INPUT_CHOICE"       "Select Audio Input"            "${AUDIO_INPUT_OPTIONS[@]}")
+$(_gtk_vbox_list "AUDIO_MAPPING_CHOICE"     "Select Audio Channel Mapping"  "${CHANNEL_MAPPING_OPTIONS[@]}" )
+$(_gtk_vbox_list "STANDARD_CHOICE"          "Select Standard"               "${STANDARD_OPTIONS[@]}")
+$(_gtk_vbox_list "VIDEO_BIT_DEPTH_CHOICE"   "Select Video Bit Depth"        "${VIDEO_BITDEPTH_OPTIONS[@]}")
+$(_gtk_vbox_list "TIMECODE_CHOICE"          "Select timecode format"        "${TIMECODE_OPTIONS[@]}")
+</hbox>"
+
+AVFOUNDATION_INPUT_GUI="<hbox>
+$(_gtk_vbox_list "VIDEO_INPUT_CHOICE"       "Select Video Input"            "${VIDEO_INPUT_OPTIONS[@]}")
+$(_gtk_vbox_list "AUDIO_INPUT_CHOICE"       "Select Audio Input"            "${AUDIO_INPUT_OPTIONS[@]}")
+$(_gtk_vbox_list "AUDIO_MAPPING_CHOICE"     "Select Audio Channel Mapping"  "${CHANNEL_MAPPING_OPTIONS[@]}" )
+$(_gtk_vbox_list "STANDARD_CHOICE"          "Select Standard"               "${STANDARD_OPTIONS[@]}")
+</hbox>"
+
   export MAIN_DIALOG="<window title=\"vrecord configuration\">
     <vbox>
-        <text>
-            <label>Set file recording options. Leave the option ${UNSELECTEDOPTION} to be prompted later.</label>
-        </text>
+        <frame Capture card options>
+        <notebook tab-labels=\"Decklink|AVFoundation|\">
+          $(if [[ "${DEVICE_INPUT_CHOICE}" == "1" ]] ; then echo "${AVFOUNDATION_INPUT_GUI}${DECKLINK_INPUT_GUI}" ; else echo "${DECKLINK_INPUT_GUI}${AVFOUNDATION_INPUT_GUI}" ;fi)
+        <variable>DEVICE_INPUT_CHOICE</variable>
+        </notebook>
+        </frame>
         <hbox>
-            <text>
-                <label>Capture card options</label>
-            </text>
-            $(_gtk_vbox_list "VIDEO_INPUT_CHOICE"       "Select Video Input"            "${VIDEO_INPUT_OPTIONS[@]}")
-            $(_gtk_vbox_list "AUDIO_INPUT_CHOICE"       "Select Audio Input"            "${AUDIO_INPUT_OPTIONS[@]}")
-            $(_gtk_vbox_list "AUDIO_MAPPING_CHOICE"     "Select Audio Channel Mapping"  "${CHANNEL_MAPPING_OPTIONS[@]}" )
-            $(_gtk_vbox_list "STANDARD_CHOICE"          "Select Standard"               "${STANDARD_OPTIONS[@]}")
-        </hbox>
-        <hbox>
-            $(_gtk_vbox_list "EMBED_LOGS_CHOICE"        "Embed digitization logs in video file (Matroska ONLY)" "${EMBED_LOGS_OPTIONS[@]}")
-            $(_gtk_vbox_list "FRAMEMD5_CHOICE"          "Create frame-level MD5 checksums? (recommended)"       "${FRAMEMD5_OPTIONS[@]}")
             $(_gtk_vbox_list "CONTAINER_CHOICE"         "Select File Format"            "${CONTAINER_OPTIONS[@]}")
+            $(_gtk_vbox_list "EMBED_LOGS_CHOICE"        "Embed digitization logs in video file (Matroska ONLY)" "${EMBED_LOGS_OPTIONS[@]}")
             $(_gtk_vbox_list "VIDEO_CODEC_CHOICE"       "Select Video Codec"            "${VIDEO_CODEC_OPTIONS[@]}")
             $(_gtk_vbox_list "FFV1_SLICE_CHOICE"        "FFV1 Slice Count"              "${FFV1_SLICE_OPTIONS[@]}")
             $(_gtk_vbox_list "AUDIO_CODEC_CHOICE"       "Select Audio Codec"            "${AUDIO_CODEC_OPTIONS[@]}")
-            $(_gtk_vbox_list "VIDEO_BIT_DEPTH_CHOICE"   "Select Video Bit Depth"        "${VIDEO_BITDEPTH_OPTIONS[@]}")
         </hbox>
         <hbox>
-            $(_gtk_vbox_list "TIMECODE_CHOICE"          "Select timecode format"        "${TIMECODE_OPTIONS[@]}")
+            $(_gtk_vbox_list "FRAMEMD5_CHOICE"          "Create frame-level MD5 checksums? (recommended)"       "${FRAMEMD5_OPTIONS[@]}")
             $(_gtk_vbox_list "QCTOOLSXML_CHOICE"        "Create QCTools XML?"           "${QCTOOLSXML_OPTIONS[@]}")
             $(_gtk_vbox_list "PLAYBACKVIEW_CHOICE"      "Select View (for recording)"   "${PLAYBACKVIEW_OPTIONS[@]}")
             $(_gtk_vbox_list "PLAYBACKVIEW_CHOICE_PASS" "Select View (for passthrough)" "${PLAYBACKVIEW_OPTIONS[@]}")
         </hbox>
+    
         <hbox>
             <vbox>
                 <text>
@@ -480,6 +489,7 @@ _edit_mode(){
             echo "As auxiliary files directory was left blank, logs will be written to recording directory at ${DIR}."
         fi
         echo "Variables set:"
+        echo "  DEVICE_INPUT_CHOICE = ${DEVICE_INPUT_CHOICE}"
         echo "  DIR = ${DIR}"
         echo "  LOGDIR = ${LOGDIR}"
         echo "  CONTAINER_CHOICE = ${CONTAINER_CHOICE}"
